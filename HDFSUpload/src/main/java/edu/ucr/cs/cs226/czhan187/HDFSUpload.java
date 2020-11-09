@@ -16,12 +16,11 @@ public class HDFSUpload
 
     static Configuration conf = new Configuration();
 
-//    copy file between hdfs and local
+
+    //    copy file between hdfs and local
     public static long copyFile(String local, String hdfs, int sign) throws Exception {
 
-        conf.set("fs.defaultFS", "hdfs://localhost:8020");
-
-        FileSystem localFS = FileSystem.get(conf);
+        FileSystem localFS = FileSystem.getLocal(conf);
         FileSystem hdfsFS = FileSystem.get(conf);
 
         Path localPath = new Path(local);
@@ -64,24 +63,24 @@ public class HDFSUpload
         long endTime = System.currentTimeMillis();
 
         if(sign == 1 || sign ==2){
-            localFS.delete(new Path(local + "_temp"));
+            localFS.delete(new Path(local + "_temp"),true);
         }
         return endTime - startTime;
     }
 
     public static void main( String[] args )
     {
-        String localPath = "/Users/vincent/Learning-Data/cs226/226-Programming-Assignment/HDFSUpload/AREAWATER.csv";
-        String hdfsPath = "hdfs://localhost:8020/AREAWATER.csv";
+
+        String localPath = args[0];
+        String hdfsPath = args[1];
+
         try {
-            long localToHDFS = HDFSUpload.copyFile(localPath, hdfsPath, 0);
-            long hdfsToLocal = HDFSUpload.copyFile(localPath, hdfsPath, 1);
-            long localToLocal = HDFSUpload.copyFile(localPath, hdfsPath, 2);
-
+            long localToHDFS = copyFile(localPath, hdfsPath, 0);
             System.out.println("Copying File from Local to HDFS needs: " + localToHDFS +"ms");
+            long hdfsToLocal = copyFile(localPath, hdfsPath, 1);
             System.out.println("Copying File from HDFS to Local needs: " + hdfsToLocal +"ms");
+            long localToLocal = copyFile(localPath, hdfsPath, 2);
             System.out.println("Copying File from Local to Local needs: " + localToLocal +"ms");
-
 
         } catch (Exception e) {
             e.printStackTrace();
